@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useNavigate, Link } from 'react-router-dom'
 import AuthContext from '../context/AuthContext'
 import InputField from './InputField'
+import { authService } from '../services/api'
 
 function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -60,13 +61,20 @@ function RegisterForm() {
     setIsLoading(true)
     
     try {
-      // Aquí irá la lógica de registro cuando conectemos con el backend
-      login(formData)
-      navigate('/home')
+      const { confirmPassword, ...registerData } = formData
+      const response = await authService.register(registerData)
+      setErrors({
+        form: 'Usuario registrado exitosamente. Redirigiendo al inicio de sesión...',
+        type: 'success'
+      })
+      setTimeout(() => {
+        navigate('/login')
+      }, 2000)
     } catch (error) {
       console.error('Error en el registro:', error)
       setErrors({
-        form: 'Error al registrar. Por favor, intenta de nuevo.'
+        form: error.message || 'Error al registrar. Por favor, intenta de nuevo.',
+        type: 'error'
       })
     } finally {
       setIsLoading(false)
@@ -81,7 +89,11 @@ function RegisterForm() {
       transition={{ delay: 0.2 }}
     >
       {errors.form && (
-        <div className="mb-4 p-3 bg-red-500/20 border border-red-500 rounded text-red-500 text-sm">
+        <div className={`mb-4 p-3 border rounded text-sm ${
+          errors.type === 'success' 
+            ? 'bg-green-500/20 border-green-500 text-green-500'
+            : 'bg-red-500/20 border-red-500 text-red-500'
+        }`}>
           {errors.form}
         </div>
       )}

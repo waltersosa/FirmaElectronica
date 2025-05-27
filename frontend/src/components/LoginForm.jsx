@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useNavigate, Link } from 'react-router-dom'
 import AuthContext from '../context/AuthContext'
 import InputField from './InputField'
+import { authService } from '../services/api'
 
 function LoginForm() {
   const [formData, setFormData] = useState({
@@ -53,12 +54,13 @@ function LoginForm() {
     setIsLoading(true)
     
     try {
-      login(formData)
+      const response = await authService.login(formData)
+      login(response.user)
       navigate('/home')
     } catch (error) {
       console.error('Error de inicio de sesión:', error)
       setErrors({
-        form: 'Error al iniciar sesión. Por favor, intenta de nuevo.'
+        form: error.message || 'Error al iniciar sesión. Por favor, intenta de nuevo.'
       })
     } finally {
       setIsLoading(false)
