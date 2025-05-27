@@ -11,9 +11,12 @@ const api = axios.create({
 // Interceptor para agregar el token a las peticiones
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    // No añadir token a las rutas de autenticación
+    if (!config.url.includes('/auth/login') && !config.url.includes('/auth/register')) {
+      const token = localStorage.getItem('token')
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
     }
     return config
   },
@@ -28,12 +31,10 @@ export const authService = {
   register: async (userData) => {
     try {
       const response = await api.post('/auth/register', userData)
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token)
-      }
       return response.data
     } catch (error) {
-      throw error.response?.data || { message: 'Error al registrar usuario' }
+      const errorMessage = error.response?.data?.message || 'Error al registrar usuario'
+      throw { message: errorMessage }
     }
   },
 
@@ -41,12 +42,10 @@ export const authService = {
   login: async (credentials) => {
     try {
       const response = await api.post('/auth/login', credentials)
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token)
-      }
       return response.data
     } catch (error) {
-      throw error.response?.data || { message: 'Error al iniciar sesión' }
+      const errorMessage = error.response?.data?.message || 'Error al iniciar sesión'
+      throw { message: errorMessage }
     }
   },
 
@@ -61,7 +60,8 @@ export const authService = {
       const response = await api.get('/auth/profile')
       return response.data
     } catch (error) {
-      throw error.response?.data || { message: 'Error al obtener perfil' }
+      const errorMessage = error.response?.data?.message || 'Error al obtener perfil'
+      throw { message: errorMessage }
     }
   },
 

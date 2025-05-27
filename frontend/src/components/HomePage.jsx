@@ -1,9 +1,23 @@
-import { useContext } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import AuthContext from '../context/AuthContext'
+import { useState } from 'react'
 
 function HomePage() {
-  const { user, logout } = useContext(AuthContext)
+  const navigate = useNavigate()
+  const [successMessage, setSuccessMessage] = useState('')
+
+  const handleLogout = () => {
+    // Mostrar mensaje de éxito
+    setSuccessMessage('¡Sesión cerrada exitosamente!')
+    
+    // Limpiar el token si existe
+    localStorage.removeItem('token')
+    
+    // Esperar un momento para mostrar el mensaje antes de navegar
+    setTimeout(() => {
+      navigate('/login', { replace: true })
+    }, 1000)
+  }
 
   return (
     <motion.div 
@@ -15,8 +29,15 @@ function HomePage() {
       <p className="text-gray-400 text-center max-w-md mb-8">
         Tu plataforma de confianza para gestionar y crear firmas electrónicas
       </p>
+      
+      {successMessage && (
+        <div className="mb-4 p-3 bg-green-500/20 border border-green-500 rounded text-green-500 text-sm">
+          {successMessage}
+        </div>
+      )}
+      
       <button 
-        onClick={logout}
+        onClick={handleLogout}
         className="primary-button max-w-xs"
       >
         Cerrar Sesión
